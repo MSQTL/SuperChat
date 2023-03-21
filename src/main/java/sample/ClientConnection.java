@@ -9,6 +9,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ClientConnection {
+    ClientWindow clientWindow;
+    DataInputStream in;
+    DataOutputStream out;
     private final String HOST = "localhost";
     private final int PORT = 8080;
     private Socket socket;
@@ -16,40 +19,41 @@ public class ClientConnection {
     public void setAuthorized(boolean flag){
         this.isAuthorized = flag;
     }
-    public ClientConnection(ClientWindow clientWindow) throws UnknownHostException {
+    public ClientConnection(ClientWindow clientWindow){
+        this.clientWindow = clientWindow;
+    }
+    public void start(){
         try {
             socket = new Socket(HOST, PORT);
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
             setAuthorized(false);
-            clientWindow.sendButton.addActionListener(e -> {
-                try {
-                    out.writeUTF(clientWindow.messageText.getText());
-                    clientWindow.messageText.setText(null);
-                }
-                catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        while (true) {
+                        while (!isAuthorized) {
                             String strFromServer = in.readUTF();
                             if(strFromServer.startsWith("//вход_выполнен")) {
                                 setAuthorized(true);
                                 break;
                             }
-                            clientWindow.chat.append(strFromServer + "\n");
+                            //clientWindow.chat.append(strFromServer + "\n");
                         }
                         while (true) {
                             String strFromServer = in.readUTF();
                             if (strFromServer.equalsIgnoreCase("/конец")) {
                                 break;
                             }
-                            clientWindow.chat.append(strFromServer);
-                            clientWindow.chat.append("\n");
+                            else if (strFromServer.contains("клиенты")){
+                                clientWindow.chat.append(strFromServer.substring(9));
+                                clientWindow.refresh(strFromServer.substring(9));
+                                System.out.println(123);
+                            }
+                            else {
+                                clientWindow.chat.append(strFromServer + strFromServer.startsWith("//клиенты"));
+                                clientWindow.chat.append("\n");
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -62,5 +66,15 @@ public class ClientConnection {
             e.printStackTrace();
         }
     }
-
+    public void onAuthClick(){
+        if (socket == null || socket.isClosed()) {
+            start();
+        }
+        try {
+            out.writeUTF(clientWindow.messageText.getText());
+            clientWindow.messageText.setText(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

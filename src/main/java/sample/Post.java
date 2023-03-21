@@ -6,11 +6,11 @@ import java.io.*;
 import java.net.Socket;
 
 public class Post {
-    private ServerConnection serverConnection;
-    private Socket socket;
-    private ServerWindow serverWindow;
-    private DataInputStream inputStream;
-    private DataOutputStream outputStream;
+    private final ServerConnection serverConnection;
+    private final Socket socket;
+    private final ServerWindow serverWindow;
+    private final DataInputStream inputStream;
+    private final DataOutputStream outputStream;
     private String name;
     public String getName(){
         return name;
@@ -72,14 +72,23 @@ public class Post {
         }
     }
     public void readMessages() throws IOException {
+
         while (true) {
+            long time = System.currentTimeMillis();
             String stringFromClient = inputStream.readUTF();
+            if (System.currentTimeMillis() - time > 60_000){
+                serverWindow.eventLog.append(name + " отключен по тайм-ауту\n");
+                serverConnection.broadcastMsg(name + " отключен по тайм-ауту\n");
+                return;
+            }
             serverWindow.eventLog.append("от " + name + ": " + stringFromClient + "\n");
+
             if (stringFromClient.equals("/конец")) {
                 return;
             }
             serverConnection.broadcastMsg(name + ": " + stringFromClient);
         }
+
     }
     public void sendMessage(String message) {
         try {
@@ -89,8 +98,8 @@ public class Post {
         }
     }
     public void closeConnection() {
-        serverConnection.unsubscribe(this);
         serverConnection.broadcastMsg(name + " вышел из чата");
+        serverConnection.unsubscribe(this);
         try {
             inputStream.close();
         } catch (IOException e) {

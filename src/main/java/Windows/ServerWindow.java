@@ -8,8 +8,8 @@ public class ServerWindow extends JFrame {
     ServerConnection serverConnection;
     public JTextArea eventLog = new JTextArea();
     JScrollPane scrollPane = new JScrollPane(eventLog);
-    JTextField messageText = new JTextField();
-    JButton sendButton = new JButton("Отправить");
+    public JTextField messageText = new JTextField();
+    public JButton sendButton = new JButton("Отправить");
     public ServerWindow(){
 
         setTitle("Сервер");
