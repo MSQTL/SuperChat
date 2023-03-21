@@ -6,7 +6,7 @@ import javax.swing.*;
 
 public class ServerWindow extends JFrame {
     ServerConnection serverConnection;
-    JTextArea eventLog = new JTextArea();
+    public JTextArea eventLog = new JTextArea();
     JScrollPane scrollPane = new JScrollPane(eventLog);
     JTextField messageText = new JTextField();
     JButton sendButton = new JButton("Отправить");
@@ -30,6 +30,6 @@ public class ServerWindow extends JFrame {
         add(sendButton);
 
         setVisible(true);
-        serverConnection = new ServerConnection();
+        serverConnection = new ServerConnection(this);
     }
 }

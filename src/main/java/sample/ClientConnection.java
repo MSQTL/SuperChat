@@ -45,7 +45,7 @@ public class ClientConnection {
                         }
                         while (true) {
                             String strFromServer = in.readUTF();
-                            if (strFromServer.equalsIgnoreCase("/end")) {
+                            if (strFromServer.equalsIgnoreCase("/конец")) {
                                 break;
                             }
                             clientWindow.chat.append(strFromServer);

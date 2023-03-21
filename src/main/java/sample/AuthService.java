@@ -1,5 +1,7 @@
 package sample;
 
+import Windows.ServerWindow;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,13 +17,15 @@ public class AuthService implements Auth{
         }
     }
     private List<User> users;
+    private ServerWindow serverWindow;
     public void start() {
-        System.out.println("Сервис аутентификации запущен");
+        serverWindow.eventLog.append("Сервис аутентификации запущен" + "\n");
     }
     public void stop() {
-        System.out.println("Сервис аутентификации остановлен");
+        serverWindow.eventLog.append("Сервис аутентификации остановлен" + "\n");
     }
-    public AuthService(){
+    public AuthService(ServerWindow serverWindow){
+        this.serverWindow = serverWindow;
         users = new ArrayList<>();
         users.add(new User("sonya", "koza", "Sonya"));
         users.add(new User("serg", "2802", "Serg"));

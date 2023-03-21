@@ -1,23 +1,25 @@
 package sample;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import Windows.ServerWindow;
+
+import java.io.*;
 import java.net.Socket;
 
 public class Post {
     private ServerConnection serverConnection;
     private Socket socket;
+    private ServerWindow serverWindow;
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
     private String name;
     public String getName(){
         return name;
     }
-    public Post(ServerConnection serverConnection, Socket socket){
+    public Post(ServerConnection serverConnection, Socket socket, ServerWindow serverWindow){
         try{
             this.serverConnection = serverConnection;
             this.socket = socket;
+            this.serverWindow = serverWindow;
             this.inputStream = new DataInputStream(socket.getInputStream());
             this.outputStream = new DataOutputStream(socket.getOutputStream());
             this.name = "";
@@ -43,28 +45,36 @@ public class Post {
             String string = inputStream.readUTF();
             if (string.startsWith("/войти")){
                 String[] parts = string.split("\\s");
-                String nickname = serverConnection.getAuthService().getNicknameByLoginPassword(parts[1], parts[2]);
-                if (nickname != null){
-                    if (!serverConnection.isNickBusy(nickname)){
-                        sendMessage("/вход_выполнен" + nickname);
-                        name = nickname;
-                        serverConnection.broadcastMsg(name + " зашел в чат");
-                        serverConnection.subscribe(this);
-                        return;
+                try {
+                    String nickname = serverConnection.getAuthService().getNicknameByLoginPassword(parts[1], parts[2]);
+                    if (nickname != null){
+                        if (!serverConnection.isNickBusy(nickname)){
+                            sendMessage("/вход_выполнен " + nickname);
+                            name = nickname;
+                            serverConnection.broadcastMsg(name + " зашел в чат");
+                            serverConnection.subscribe(this);
+                            return;
+                        }
+                        else {
+                            sendMessage("Учетная запись уже используется");
+                        }
+                    }else{
+                        sendMessage("Неверный логин/пароль");
                     }
-                    else {
-                        sendMessage("Учетная запись уже используется");
-                    }
-                }else{
-                    sendMessage("Неверный логин/пароль");
                 }
+                catch (IndexOutOfBoundsException exception){
+                    sendMessage("Неверная команда");
+                }
+            }
+            else {
+                sendMessage("Неверная команда");
             }
         }
     }
     public void readMessages() throws IOException {
         while (true) {
             String stringFromClient = inputStream.readUTF();
-            System.out.println("от " + name + ": " + stringFromClient);
+            serverWindow.eventLog.append("от " + name + ": " + stringFromClient + "\n");
             if (stringFromClient.equals("/конец")) {
                 return;
             }

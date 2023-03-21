@@ -1,5 +1,7 @@
 package sample;
 
+import Windows.ServerWindow;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
@@ -12,21 +14,23 @@ public class ServerConnection {
         return authService;
     }
     private List<Post> postList;
+    private ServerWindow serverWindow;
 
-    public ServerConnection(){
+    public ServerConnection(ServerWindow serverWindow){
+        this.serverWindow = serverWindow;
         try(ServerSocket serverSocket = new ServerSocket(PORT)) {
-            authService = new AuthService();
+            serverWindow.eventLog.append("Сервер активен" + "\n");
+            authService = new AuthService(serverWindow);
             authService.start();
             postList = new ArrayList<>();
             while (true){
-                System.out.println("Сервер ожидает подключения");
                 Socket socket = serverSocket.accept();
-                System.out.println("Клиент подключен!");
-                new Post(this, socket);
+                serverWindow.eventLog.append("Клиент подключен!" + "\n");
+                new Post(this, socket, serverWindow);
             }
         }
         catch (IOException e) {
-            System.out.println("Ошибка в работе сервера");;
+            serverWindow.eventLog.append("Ошибка в работе сервера" + "\n");
         }
         finally {
             if (authService != null){
