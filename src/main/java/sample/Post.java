@@ -76,17 +76,27 @@ public class Post {
         while (true) {
             long time = System.currentTimeMillis();
             String stringFromClient = inputStream.readUTF();
-            if (System.currentTimeMillis() - time > 60_000){
-                serverWindow.eventLog.append(name + " отключен по тайм-ауту\n");
-                serverConnection.broadcastMsg(name + " отключен по тайм-ауту\n");
-                return;
-            }
+//            if (System.currentTimeMillis() - time > 60_000){
+//                serverWindow.eventLog.append(name + " отключен по тайм-ауту\n");
+//                serverConnection.broadcastMsg(name + " отключен по тайм-ауту\n");
+//                return;
+//            }
             serverWindow.eventLog.append("от " + name + ": " + stringFromClient + "\n");
 
             if (stringFromClient.equals("/конец")) {
                 return;
             }
-            serverConnection.broadcastMsg(name + ": " + stringFromClient);
+            if(stringFromClient.startsWith("/p")){
+                String[] str = stringFromClient.split(" ", 2);
+                serverWindow.eventLog.append("Отправлено приватное сообщение");
+                serverWindow.eventLog.append("\n");
+                if(!this.getName().equals(str[0].substring(2))) {
+                    serverConnection.sendMessageToClient(this.getName(), stringFromClient);
+                }
+            }
+            else{
+                serverConnection.broadcastMsg(name + ": " + stringFromClient);
+            }
         }
 
     }

@@ -61,11 +61,11 @@ public class ServerConnection {
         }
     }
     public synchronized void broadcastClientsList() {
-        String sb ="/клиенты ";
+        StringBuilder sb = new StringBuilder("/клиенты ");
         for (Post post : postList) {
-            sb += post.getName() + " ";
+            sb.append(post.getName()).append(" ");
         }
-        broadcastMsg(sb);
+        broadcastMsg(sb.toString());
     }
     public synchronized void unsubscribe(Post post) {
         postList.remove(post);
@@ -74,5 +74,13 @@ public class ServerConnection {
     public synchronized void subscribe(Post post) {
         postList.add(post);
         broadcastClientsList();
+    }
+    public synchronized void sendMessageToClient(String nickFrom, String message){
+        String[] messageFrom = message.split(" ", 2);
+        for(Post post : postList){
+            if(post.getName().equals(messageFrom[0].substring(2)) || post.getName().equals(nickFrom)){
+                post.sendMessage("/f" + nickFrom + " " + messageFrom[1]);
+            }
+        }
     }
 }
