@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServerConnection {
-    private ServerWindow serverWindow;
+    private final ServerWindow serverWindow;
     final int PORT = 8080;
     private AuthService authService;
     public AuthService getAuthService(){
@@ -78,7 +78,7 @@ public class ServerConnection {
     public synchronized void sendMessageToClient(String nickFrom, String message){
         String[] messageFrom = message.split(" ", 2);
         for(Post post : postList){
-            if(post.getName().equals(messageFrom[0].substring(2)) || post.getName().equals(nickFrom)){
+            if(post.getName().equals(messageFrom[0].substring(2))){
                 post.sendMessage("/f" + nickFrom + " " + messageFrom[1]);
             }
         }
