@@ -28,8 +28,7 @@ public class Post {
                     authentication();
                     readMessages();
                 }
-                catch (IOException e) {
-                    throw new RuntimeException(e);
+                catch (IOException ignored) {
                 }
                 finally {
                     closeConnection();
@@ -103,8 +102,7 @@ public class Post {
     public void sendMessage(String message) {
         try {
             outputStream.writeUTF(message);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
     }
     public void closeConnection() {

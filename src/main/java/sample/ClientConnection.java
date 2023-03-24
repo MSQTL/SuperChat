@@ -3,6 +3,8 @@ package sample;
 import Windows.ClientWindow;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import java.awt.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,11 +14,11 @@ import java.util.Objects;
 public class ClientConnection {
     ClientWindow clientWindow;
     DataInputStream in;
-    DataOutputStream out;
-    private final String HOST = "localhost";
-    private final int PORT = 8080;
+    public DataOutputStream out;
     private Socket socket;
     private boolean isAuthorized;
+    Font fontText = new Font("", Font.PLAIN, 17);
+    Font fontButton = new Font("", Font.BOLD, 12);
     public void setAuthorized(boolean flag){
         this.isAuthorized = flag;
     }
@@ -25,6 +27,8 @@ public class ClientConnection {
     }
     public void start(){
         try {
+            String HOST = "localhost";
+            int PORT = 8080;
             socket = new Socket(HOST, PORT);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
@@ -34,10 +38,11 @@ public class ClientConnection {
                     while (!isAuthorized) {
                         String strFromServer = in.readUTF();
                         if(strFromServer.startsWith("/вход_выполнен")) {
+                            String[] array = strFromServer.split(" ", 2);
+                            clientWindow.setTitle(array[1]);
                             setAuthorized(true);
                             break;
                         }
-                        clientWindow.chat.append(strFromServer + "\n");
                     }
                     while (true) {
                         String strFromServer = in.readUTF();
@@ -71,18 +76,34 @@ public class ClientConnection {
                                 privateChatArea.setLineWrap(true);
                                 privateChatArea.setWrapStyleWord(true);
                                 JScrollPane scrollPrivateChatArea = new JScrollPane(privateChatArea);
-                                privateChatArea.setBounds(5, 5, 350, 478);
-                                scrollPrivateChatArea.setBounds(20,20, 350, 478);
+                                privateChatArea.setBounds(5, 5, 457, 478);
+                                scrollPrivateChatArea.setBounds(5,5, 457, 478);
 
                                 JTextField privateMessageText = new JTextField();
-                                privateMessageText.setBounds(5,488,270, 30);
+                                privateMessageText.setBounds(5,488,378, 30);
 
                                 JButton privateSendButton = new JButton("Отправить");
-                                privateSendButton.setBounds(280, 489, 74, 28);
+                                privateSendButton.setBounds(388, 488, 74, 31);
                                 privateSendButton.addActionListener(e -> onPrivateClick());
                                 privateChat.add(privateChatArea);
                                 privateChat.add(privateMessageText);
                                 privateChat.add(privateSendButton);
+
+                                privateChatArea.setFont(fontText);
+                                privateChat.setBackground(new Color(198, 219, 241));
+                                privateChat.setForeground(new Color(28, 71, 110));
+                                privateChatArea.setBackground(new Color(237, 240, 238));
+                                privateChatArea.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, new Color(215, 253, 227), new Color(177, 224, 195)));
+                                scrollPrivateChatArea.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, new Color(198, 219, 241), new Color(173, 192, 211)));
+                                privateMessageText.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED, new Color(198, 219, 241), new Color(173, 192, 211)));
+                                privateMessageText.setForeground(new Color(28, 71, 110));
+                                privateMessageText.setBackground(new Color(233, 236, 234));
+                                privateMessageText.setFont(fontText);
+                                privateSendButton.setFont(fontButton);
+                                privateSendButton.setMargin(new Insets(0, 0, 0, 0));
+                                privateSendButton.setBackground(new Color(233, 236, 234));
+                                privateSendButton.setForeground(new Color(28, 71, 110));
+                                privateSendButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, new Color(198, 219, 241), new Color(173, 192, 211)));
                             }
                         }
                         else {
@@ -90,14 +111,12 @@ public class ClientConnection {
                             clientWindow.chat.append("\n");
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (Exception ignored) {
                 }
             });
             t.setDaemon(true);
             t.start();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
     }
     public void onAuthClick(){

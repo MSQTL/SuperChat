@@ -12,6 +12,7 @@ public class ServerWindow extends JFrame {
     public JButton sendButton = new JButton("Отправить");
     public ServerWindow(){
 
+        setResizable(false);
         setTitle("Сервер");
         setLayout(null);
         setSize(400, 500);
